@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VSION — Visualize a discussão</title>
+
+  <!-- Font Neue Montreal -->
+  <link href="https://fonts.cdnfonts.com/css/pp-neue-montreal" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Favicon (opcional) -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+
+<body>
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <img class="hero-bg" src="videos/hero-section.png" alt="Esfera VSION" />
+
+    <div class="hero_wrapper">
+      <!-- Texto principal no topo -->
+      <div class="hero_top">
+        <h1>Veja além.<br>Visualize a discussão</h1>
+      </div>
+
+      <!-- Texto + botão no fundo -->
+      <div class="hero_bottom">
+        <p>
+          <strong>Compreender debates na web se tornou mais fácil.</strong><br>
+          Esse sistema traduz conversas complexas em visualizações, permitindo que qualquer pessoa analise seu conteúdo de forma crítica.
+        </p>
+        <div class="subhead">
+          <button class="btn-explore">
+            <div class="btn-text">explorar visualizações</div> 
+            <div class="btn-icon">
+              <img src="https://cdn.prod.website-files.com/679d8b01c23ed7847fc5108f/6819ec297e6347786f9815eb_arrow_button.svg" alt="Seta">
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DESCRIÇÃO ===== -->
+  <section class="descricao project-section">
+    <div class="descricao-texto project-text">
+      <h2>Descrição</h2>
+      <p>
+        O sistema é uma plataforma interativa que transforma discussões em redes sociais em visualizações dinâmicas e compreensíveis.
+        Através de técnicas de <strong>visualização de dados</strong>, a aplicação permite identificar padrões de participação,
+        influência e polarização em debates online.  
+        Desenvolvido no contexto acadêmico da Universidade Presbiteriana Mackenzie, o projeto busca tornar
+        a análise de conversas digitais mais <strong>transparente, acessível e visualmente intuitiva</strong>.
+    </p>
+      </p>
+    </div>
+
+    <div class="descricao-video project-video">
+      <div class="video-wrapper">
+        <iframe
+          src="https://www.youtube.com/embed/wp84sRpM1Js?rel=0&showinfo=0&autoplay=0&mute=1&loop=0"
+          title="Demonstração do Projeto VSION"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VISUALIZAÇÕES ===== -->
+  <section class="visualizacoes">
+    <h2>Visualização</h2>
+
+    <div class="vis-container">
+      <a href="participacao_up.html" class="vis-card-link">
+        <article class="vis-card">
+          <img src="images/vis1.png" alt="Visualização de Participação">
+          <div class="vis-content">
+            <div class="vis-title">
+              <h3>visualização de participação</h3>
+              <div class="vis-dots">
+                <div class="dot"></div>
+              </div>
+            </div>
+            <p>mostra quem mais contribui e movimenta a conversa.</p>
+          </div>
+        </article>
+      </a>
+
+      <a href="popularidade_up.html" class="vis-card-link">
+        <article class="vis-card">
+          <img src="images/vis2.png" alt="Visualização de Popularidade">
+          <div class="vis-content">
+            <div class="vis-title">
+              <h3>visualização de popularidade</h3>
+              <div class="vis-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+            </div>
+            <p>evidencia o alcance e o engajamento de cada voz.</p>
+          </div>
+        </article>
+      </a>
+
+      <a href="polemica_up.html" class="vis-card-link">
+        <article class="vis-card">
+          <img src="images/vis3.png" alt="Visualização de Polemica">
+          <div class="vis-content">
+            <div class="vis-title">
+              <h3>visualização de polemica</h3>
+              <div class="vis-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+            </div>
+            <p>revela onde surgem os confrontos e divergências de opinião.</p>
+          </div>
+        </article>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <!-- Lado esquerdo -->
+    <div class="footer-left">
+      <div class="footer-info">
+        <p>© 2025</p>
+        <p>VSION.</p>
+      </div>
+      <img src="assets/logo-vsion.svg" alt="Logo VSION" class="footer-logo">
+    </div>
+
+    <!-- Lado direito -->
+    <div class="footer-right">
+      <div class="footer-grid">
+        <div class="footer-labels">
+          <p>Desenvolvido por</p>
+          <p>Orientação&nbsp;&nbsp;&nbsp;&nbsp;por</p>
+        </div>
+
+        <div class="footer-names">
+          <p>Vitor Akira Uehara</p>
+          <p>Ivan Carlos A. de Oliveira</p>
+          <div class="footer-dot"></div>
+          <p>Mackenzie</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Draggable.min.js"></script>
+  <script src="js/core/animation.js"></script>
+</body>
+</html>

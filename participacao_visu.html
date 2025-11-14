@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>VSION — Visualização de Participação</title>
+  <link href="https://fonts.cdnfonts.com/css/pp-neue-montreal" rel="stylesheet">
+  <link rel="stylesheet" href="css/visu.css">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+
+<body>
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <a href="index.html" class="logo">VSION</a>
+    <button id="menu-toggle">☰</button>
+  </header>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside id="sidebar">
+    <h2>Resumo</h2>
+    <div id="totals">Carregando estatísticas...</div>
+    <hr>
+    
+    <h2>Detalhes do Nó</h2>
+    <div id="node-info">Clique em um nó para ver os detalhes.</div>
+    <hr>
+  </aside>
+
+  <!-- ===== VISUALIZAÇÃO ===== -->
+  <main id="cy"></main>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="https://unpkg.com/cytoscape@3.24.0/dist/cytoscape.min.js"></script>
+  <script src="js/data/participacao_visu.js"></script>
+</body>
+</html>

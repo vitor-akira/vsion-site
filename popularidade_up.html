@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VSION — Visualização de Popularidade</title>
+
+  <link href="https://fonts.cdnfonts.com/css/pp-neue-montreal" rel="stylesheet">
+  <link rel="stylesheet" href="css/participacao.css">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <a href="index.html" class="logo">VSION</a>
+  </header>
+
+  <!-- CONTEÚDO -->
+  <section class="participacao">
+    <div class="container">
+      <h1>Visualização de Popularidade</h1>
+
+      <div class="section-block">
+        <span class="number">(01)</span>
+        <div class="text-block">
+          <h2>Descrição</h2>
+          <p>
+            Esta visualização mostra o equilíbrio entre mensagens de apoio, neutralidade e oposição
+            em cada autor, evidenciando as tendências e a diversidade de opiniões na discussão.
+          </p>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <span class="number">(02)</span>
+        <div class="text-block">
+          <h2>Detalhe</h2>
+          <p>O arquivo deve estar no formato <strong>.json</strong> e conter os campos:</p>
+          <div class="dataset-structure">
+            <div><strong>author_id</strong></div><div>—</div><div>identificador do usuário</div>
+            <div><strong>text</strong></div><div>—</div><div>conteudo das mensagens</div>
+            <div><strong>entities</strong></div><div>—</div><div>menções contidas nas mensagens</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD -->
+      <div class="upload-wrapper">
+        <h2>envie seu dataset</h2>
+        <div class="upload-box" id="uploadBox">
+          <p>Arraste e solte seu arquivo aqui<br>ou clique para enviar</p>
+        </div>
+
+        <div class="upload-btn-wrapper">
+          <button class="btn-confirm">
+            <span>gerar visualização</span>
+            <div class="btn-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-left">
+      <div class="footer-info"><p>© 2025</p><p>VSION.</p></div>
+      <img src="assets/logo-vsion.svg" alt="Logo VSION" class="footer-logo">
+    </div>
+    <div class="footer-right">
+      <div class="footer-grid">
+        <div class="footer-labels"><p>Desenvolvido por</p><p>Orientação&nbsp;&nbsp;&nbsp;&nbsp;por</p></div>
+        <div class="footer-names"><p>Vitor Akira Uehara</p><p>Ivan Carlos A. de Oliveira</p><div class="footer-dot"></div><p>Mackenzie</p></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data/popularidade_up.js"></script>
+</body>
+</html>
