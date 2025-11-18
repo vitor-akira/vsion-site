@@ -9,11 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmBtn = document.querySelector(".btn-confirm");
   let jsonData = null;
 
-  // ===== CLIQUE OU ARRASTE =====
+  // ========= CLIQUE OU ARRASTE =========
   uploadBox.addEventListener("click", () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".json";
+    input.accept = ".json, .csv";
     input.onchange = handleFile;
     input.click();
   });
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     handleFile({ target: { files: e.dataTransfer.files } });
   });
 
-  // ===== BOTÃO DE CONFIRMAÇÃO =====
+  // ========= BOTÃO DE CONFIRMAÇÃO =========
   confirmBtn.addEventListener("click", () => {
     if (!jsonData) {
       alert("Por favor, envie um arquivo primeiro!");
@@ -41,46 +41,180 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // Armazena o JSON como string em window.name (sobrevive entre páginas)
       window.name = JSON.stringify(jsonData);
-
-      // Redireciona para a página de visualização
       window.location.href = "polemica_visu.html";
     } catch (e) {
-      alert("Erro ao transferir o arquivo para a próxima página.");
+      alert("Erro ao transferir o arquivo.");
       console.error(e);
     }
   });
 
-  // ===== LEITURA DO ARQUIVO =====
+  // ========= LEITURA DO ARQUIVO (JSON / CSV) =========
   function handleFile(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     if (file.size > 100 * 1024 * 1024) {
-      alert("O arquivo é muito grande (limite: 100 MB)");
+      alert("Arquivo muito grande (limite: 100 MB)");
       return;
     }
 
     const reader = new FileReader();
     reader.onload = (ev) => {
-      try {
-        const parsed = JSON.parse(ev.target.result);
+      const text = ev.target.result;
 
-        if (!parsed.nodes || !parsed.edges) {
-          alert("O JSON deve conter as chaves 'nodes' e 'edges'.");
-          return;
+      // ======== JSON ========
+      if (file.name.endsWith(".json")) {
+        try {
+          const parsed = JSON.parse(text);
+
+          if (!parsed.nodes || !parsed.edges) {
+            alert("O JSON deve conter 'nodes' e 'edges'.");
+            return;
+          }
+
+          jsonData = parsed;
+          uploadBox.innerHTML = `<p style="color:#00FF66;">✔ ${file.name} carregado (JSON).</p>`;
+          console.log("JSON carregado:", parsed);
+        } catch (err) {
+          alert("Erro: JSON inválido.");
+          console.error(err);
         }
-
-        jsonData = parsed;
-        uploadBox.innerHTML = `<p style="color:#00FF66;">✔ ${file.name} carregado com sucesso.</p>`;
-        console.log("✅ JSON de polêmica carregado:", parsed);
-      } catch (err) {
-        alert("Erro: o arquivo não é um JSON válido.");
-        console.error("❌ Erro de parse:", err);
+        return;
       }
+
+      // ======== CSV ========
+      if (file.name.endsWith(".csv")) {
+        try {
+          jsonData = convertCSVtoJSON(text);
+          uploadBox.innerHTML = `<p style="color:#00FF66;">✔ ${file.name} convertido (CSV → JSON).</p>`;
+          console.log("CSV convertido:", jsonData);
+        } catch (err) {
+          alert("Erro ao converter CSV.");
+          console.error(err);
+        }
+        return;
+      }
+
+      alert("Formato inválido. Envie JSON ou CSV.");
     };
 
     reader.readAsText(file);
+  }
+
+  // ======================================================
+  // ========= CONVERSOR CSV (NÓS + EDGES → JSON) =========
+  // ======================================================
+
+  function convertCSVtoJSON(csvText) {
+    const rows = parseCSV(csvText);
+    const headers = rows[0].map((h) => h.trim());
+    const data = rows.slice(1);
+
+    const nodes = {};
+    const edges = [];
+
+    for (const cols of data) {
+      const obj = {};
+      headers.forEach((h, i) => (obj[h] = cols[i] ?? ""));
+
+      // ---------------------
+      // Reconstrução do nó SOURCE
+      // ---------------------
+      const sid = obj.source_id;
+      if (!nodes[sid]) {
+        nodes[sid] = {
+          id: sid,
+          label: obj.source_label,
+          text: obj.source_text,
+          apoio: Number(obj.source_apoio),
+          oposicao: Number(obj.source_oposicao),
+          neutralidade: Number(obj.source_neutralidade),
+          total: Number(obj.source_total)
+        };
+      }
+
+      // ---------------------
+      // Reconstrução do nó TARGET
+      // ---------------------
+      const tid = obj.target_id;
+      if (!nodes[tid]) {
+        nodes[tid] = {
+          id: tid,
+          label: obj.target_label,
+          text: obj.target_text,
+          apoio: Number(obj.target_apoio),
+          oposicao: Number(obj.target_oposicao),
+          neutralidade: Number(obj.target_neutralidade),
+          total: Number(obj.target_total)
+        };
+      }
+
+      // ---------------------
+      // Criar a aresta
+      // ---------------------
+      edges.push({
+        source: sid,
+        target: tid,
+        relation: obj.edge_relation,
+        color: obj.edge_color,
+        text: obj.edge_text
+      });
+    }
+
+    return { nodes: Object.values(nodes), edges };
+  }
+
+  // ======================================================
+  // =================== PARSER CSV =======================
+  // ======================================================
+
+  function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let current = "";
+    let insideQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      const next = text[i + 1];
+
+      // Aspas escapadas ""
+      if (c === '"' && next === '"') {
+        current += '"';
+        i++;
+        continue;
+      }
+
+      if (c === '"') {
+        insideQuotes = !insideQuotes;
+        continue;
+      }
+
+      if (c === "," && !insideQuotes) {
+        row.push(current);
+        current = "";
+        continue;
+      }
+
+      if ((c === "\n" || c === "\r") && !insideQuotes) {
+        if (current.length > 0 || row.length > 0) {
+          row.push(current);
+          rows.push(row);
+        }
+        current = "";
+        row = [];
+        continue;
+      }
+
+      current += c;
+    }
+
+    if (current.length > 0 || row.length > 0) {
+      row.push(current);
+      rows.push(row);
+    }
+
+    return rows;
   }
 });
