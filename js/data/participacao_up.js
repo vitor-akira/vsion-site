@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmBtn = document.querySelector(".btn-confirm");
   let jsonData = null;
 
-  // Clique e drag
   uploadBox.addEventListener("click", () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -18,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   uploadBox.addEventListener("dragleave", () => uploadBox.classList.remove("dragging"));
+
   uploadBox.addEventListener("drop", e => {
     e.preventDefault();
     uploadBox.classList.remove("dragging");
@@ -35,9 +35,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // =====================================================
-  //                    LEITURA DO ARQUIVO
-  // =====================================================
+  // ----------------------------
+  // LEITURA DO ARQUIVO
+  // ----------------------------
   function handleFile(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -51,106 +51,52 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.onload = ev => {
       const text = ev.target.result;
 
-      // ---------------- JSON -----------------
       if (file.name.endsWith(".json")) {
         try {
-          const parsed = JSON.parse(text);
-
-          // === VALIDAÇÃO JSON ===
-          if (!validateJSON(parsed)) return;
-
-          jsonData = parsed;
-          uploadBox.innerHTML = `<p style="color:#0f0;">✔ ${file.name} carregado com sucesso (JSON).</p>`;
-          console.log("JSON carregado:", jsonData);
-          return;
-
-        } catch (err) {
-          alert("Erro: o arquivo JSON é inválido.");
-          return;
+          jsonData = JSON.parse(text);
+          uploadBox.innerHTML = `<p style="color:#0f0;">✔ ${file.name} carregado (JSON).</p>`;
+        } catch {
+          alert("Erro: JSON inválido.");
         }
+        return;
       }
 
-      // ---------------- CSV -----------------
-      else if (file.name.endsWith(".csv")) {
+      if (file.name.endsWith(".csv")) {
         try {
           const csvRows = parseCSV(text);
-          const headers = csvRows[0].map(h => h.trim());
-
-          // === VALIDAÇÃO CSV ===
-          if (!validateCSV(headers)) return;
-
           jsonData = convertCSVtoJSON(csvRows);
-          uploadBox.innerHTML = `<p style="color:#0f0;">✔ ${file.name} carregado e convertido (CSV → JSON).</p>`;
-          console.log("CSV convertido:", jsonData);
-          return;
-
+          uploadBox.innerHTML = `<p style="color:#0f0;">✔ ${file.name} convertido (CSV → JSON).</p>`;
         } catch (err) {
           alert("Erro ao converter CSV.");
           console.error(err);
-          return;
         }
+        return;
       }
 
-      else {
-        alert("Formato inválido. Envie JSON ou CSV.");
-      }
+      alert("Formato inválido. Envie JSON ou CSV.");
     };
 
     reader.readAsText(file);
   }
 
-  //VALIDAÇÕES       //
-
-  //valida JSON
-  function validateJSON(parsed) {
-    if (!Array.isArray(parsed)) {
-      alert("O JSON deve conter uma lista de objetos.");
-      return false;
-    }
-
-    const sample = parsed[0] || {};
-
-    if (!("author_id" in sample) || !("texts" in sample)) {
-      alert("❌ O arquivo JSON não contém as colunas obrigatórias: author_id e text.");
-      return false;
-    }
-
-    return true;
-  }
-
-  //valida CSV
-  function validateCSV(headers) {
-    const required = ["author_id", "texts"];
-
-    const missing = required.filter(col => !headers.includes(col));
-    if (missing.length > 0) {
-      alert(`❌ O arquivo CSV não contém as colunas obrigatórias: ${missing.join(", ")}`);
-      return false;
-    }
-
-    return true;
-  }
-
-  // =====================================================
-  //                  CSV → JSON CONVERSOR
-  // =====================================================
-
+  // ----------------------------
+  // CSV → JSON
+  // ----------------------------
   function convertCSVtoJSON(rows) {
     const headers = rows[0].map(h => h.trim());
-    const jsonArr = [];
+    const arr = [];
 
     for (let i = 1; i < rows.length; i++) {
       const cols = rows[i];
       const obj = {};
 
-      headers.forEach((h, idx) => {
-        obj[h] = cols[idx] ?? "";
-      });
+      headers.forEach((h, idx) => obj[h] = cols[idx] ?? "");
 
-      jsonArr.push({
+      arr.push({
         author_id: obj.author_id,
         interactions: Number(obj.interactions ?? 0),
-        texts: obj.text ? obj.text.split(" | ").map(t => t.trim()) : [],
+        // ✅ FIX: agora usa texts corretamente
+        texts: obj.texts ? obj.texts.split(" | ").map(t => t.trim()) : [],
         position: {
           x: Number(obj.position_x ?? 0),
           y: Number(obj.position_y ?? 0)
@@ -158,17 +104,17 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    return jsonArr;
+    return arr;
   }
 
-  // =====================================================
-  //                  PARSER DE CSV ROBUSTO
-  // =====================================================
+  // ----------------------------
+  // parseCSV
+  // ----------------------------
   function parseCSV(text) {
     const rows = [];
+    let row = [];
     let current = "";
     let insideQuotes = false;
-    let row = [];
 
     for (let i = 0; i < text.length; i++) {
       const c = text[i];
@@ -177,27 +123,28 @@ document.addEventListener("DOMContentLoaded", () => {
       if (c === '"' && next === '"') {
         current += '"';
         i++;
+        continue;
       }
-      else if (c === '"') {
+      if (c === '"') {
         insideQuotes = !insideQuotes;
+        continue;
       }
-      else if (c === ',' && !insideQuotes) {
+      if (c === "," && !insideQuotes) {
         row.push(current);
         current = "";
+        continue;
       }
-      else if ((c === '\n' || c === '\r') && !insideQuotes) {
+      if ((c === "\n" || c === "\r") && !insideQuotes) {
         if (current.length > 0 || row.length > 0) {
           row.push(current);
           rows.push(row);
         }
-        current = "";
         row = [];
+        current = "";
+        continue;
       }
-      else {
-        current += c;
-      }
+      current += c;
     }
-
     if (current.length > 0 || row.length > 0) {
       row.push(current);
       rows.push(row);

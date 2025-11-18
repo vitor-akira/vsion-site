@@ -67,12 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // ===== JSON =====
       if (file.name.endsWith(".json")) {
         try {
-          const parsed = JSON.parse(text);
-
-          // valida atributos obrigatórios
-          if (!validateJSON(parsed)) return;
-
-          jsonData = parsed;
+          jsonData = JSON.parse(text);
           uploadBox.innerHTML = `<p style="color:#00FF66;">✔ ${file.name} carregado com sucesso (JSON).</p>`;
           console.log("JSON carregado:", jsonData);
         } catch (err) {
@@ -84,13 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // ===== CSV =====
       if (file.name.endsWith(".csv")) {
         try {
-          const rows = parseCSV(text);
-          const headers = rows[0].map(h => h.trim());
-
-          // valida cabeçalhos obrigatórios
-          if (!validateCSV(headers)) return;
-
-          jsonData = convertCSVtoJSON(rows);
+          jsonData = convertCSVtoJSON(text);
           uploadBox.innerHTML = `<p style="color:#00FF66;">✔ ${file.name} convertido com sucesso (CSV → JSON).</p>`;
           console.log("CSV convertido:", jsonData);
         } catch (err) {
@@ -106,51 +95,11 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.readAsText(file);
   }
 
-  //VALIDAÇÃO DE JSON 
-
-  function validateJSON(parsed) {
-    if (!Array.isArray(parsed)) {
-      alert("Erro: o JSON deve conter uma lista de objetos.");
-      return false;
-    }
-
-    const sample = parsed[0] ?? {};
-
-    if (!("author_id" in sample) ||
-        !("texts" in sample) ||
-        !("name" in sample)) {
-
-      alert("❌ O arquivo JSON enviado não contém os campos necessários para gerar a visualização.\n" +
-            "Campos obrigatórios: author_id, text, entities");
-      return false;
-    }
-
-    return true;
-  }
-
-
-  //VALIDAÇÃO DE CSV 
-  function validateCSV(headers) {
-    const required = ["author_id", "texts", "name"];
-
-    const missing = required.filter(c => !headers.includes(c));
-
-    if (missing.length > 0) {
-      alert(
-        "❌ O arquivo CSV não contém os campos necessários para gerar a visualização.\n" +
-        "Campos obrigatórios: author_id, text, entities\n\n" +
-        "Campos ausentes: " + missing.join(", ")
-      );
-      return false;
-    }
-
-    return true;
-  }
-
   // ================================================
-  // Conversor CSV → JSON
+  // Conversor CSV → JSON (para dados de popularidade)
   // ================================================
-  function convertCSVtoJSON(rows) {
+  function convertCSVtoJSON(csvText) {
+    const rows = parseCSV(csvText);
     const headers = rows[0].map((h) => h.trim());
     const jsonArr = [];
 
@@ -162,26 +111,47 @@ document.addEventListener("DOMContentLoaded", () => {
         obj[h] = cols[idx] ?? "";
       });
 
-      // Converte entities caso seja string
-      let entitiesData = obj.entities;
-      try {
-        entitiesData = JSON.parse(obj.entities);
-      } catch {
-        // mantém como string se vier inválido (evita crash)
-      }
-
+      // Recriação do objeto original usado pela visualização
       jsonArr.push({
         author_id: String(obj.author_id ?? ""),
-        text: obj.text ?? "",
-        entities: entitiesData
+        name: obj.name ?? "",
+        interactions: Number(obj.interactions ?? 0),
+        apoio: Number(obj.apoio ?? 0),
+        neutralidade: Number(obj.neutralidade ?? 0),
+        oposicao: Number(obj.oposicao ?? 0),
+
+        // --- reconstrói "texts"
+        texts: parseTexts(obj.texts),
+
+        position: {
+          x: Number(obj.position_x ?? 0),
+          y: Number(obj.position_y ?? 0),
+        },
       });
     }
 
     return jsonArr;
   }
 
+  // ======================================================
+  // Recria textos com categoria → [{"text": "...", "type": "..."}]
+  // ======================================================
+  function parseTexts(textField) {
+    if (!textField || textField.trim() === "") return [];
+
+    return textField.split(" | ").map((item) => {
+      const match = item.match(/^(.*)\((apoio|oposicao|neutralidade)\)$/i);
+      if (!match) return { text: item.trim(), type: "neutralidade" };
+
+      return {
+        text: match[1].trim(),
+        type: match[2].trim().toLowerCase(),
+      };
+    });
+  }
+
   // ============================
-  // CSV parser robusto
+  // CSV robusto (suporta aspas)
   // ============================
   function parseCSV(text) {
     const rows = [];
@@ -193,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const c = text[i];
       const next = text[i + 1];
 
+      // Aspas escapadas ""
       if (c === '"' && next === '"') {
         current += '"';
         i++;
@@ -215,8 +186,8 @@ document.addEventListener("DOMContentLoaded", () => {
           row.push(current);
           rows.push(row);
         }
-        current = "";
         row = [];
+        current = "";
         continue;
       }
 
